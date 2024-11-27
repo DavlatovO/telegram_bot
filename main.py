@@ -7,8 +7,9 @@ from oyat import getOyat
 from quran import getSurah
 from db_saver import save_user
 from agent_007 import send_to_admin
+import os
 
-API_TOKEN = '7818707015:AAFejca3Qct648RgNCgZYsV29LiWMtk9KE8'
+API_TOKEN = os.getenv("bot_token")
 
 def split_into_chunks(input_string, max_length):
     parts = []
