@@ -9,6 +9,17 @@ from db_saver import save_user
 from agent_007 import send_to_admin
 import os
 
+from dotenv import load_dotenv
+
+# Load environment variables from the .env file
+load_dotenv()
+
+# Get the token
+API_TOKEN = os.getenv("bot_token")
+
+# Validate the token
+if API_TOKEN is None:
+    raise ValueError("bot_token is not set in the .env file.")
 API_TOKEN = os.getenv("bot_token")
 
 def split_into_chunks(input_string, max_length):
