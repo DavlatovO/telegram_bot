@@ -10,6 +10,7 @@ from agent_007 import send_to_admin
 import os
 from dotenv import load_dotenv
 from aiohttp import web  # Required for handling a dummy server
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -54,8 +55,37 @@ async def main():
     # Command handler for `/help`
     @dp.message(Command(commands=["help"]))
     async def send_help(message: Message):
-        await message.answer("Contact: @Bestoftheplayers")
+        await message.reply("Contact: @Bestoftheplayers")
 
+    @dp.message(Command(commands=["languages"]))
+    async def choose_language(message: Message):
+        # Create inline buttons for language selection
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="English 🇬🇧", callback_data="lang_en")],
+                [InlineKeyboardButton(text="Arabic 🇸🇦", callback_data="lang_ar")],
+                [InlineKeyboardButton(text="Uzbek 🇺🇿", callback_data="lang_uz")],
+            ]
+        )
+
+        await message.answer("Choose a language:", reply_markup=keyboard)
+   
+    @dp.callback_query()
+    async def handle_language_selection(callback_query):
+        data = callback_query.data  # Get the callback data (e.g., "lang_en", "lang_ar", "lang_uz")
+        
+        if data == "lang_en":
+            await callback_query.message.edit_text("You selected English 🇬🇧")
+            # Perform any other logic for setting the language to English (e.g., saving the language choice)
+        elif data == "lang_ar":
+            await callback_query.message.edit_text("You selected Arabic 🇸🇦")
+            # Perform any other logic for setting the language to Arabic
+        elif data == "lang_uz":
+            await callback_query.message.edit_text("You selected Uzbek 🇺🇿")
+            # Perform any other logic for setting the language to Uzbek
+
+        # Acknowledge the callback to remove the loading state
+        await callback_query.answer()
     # Message handler for user inputs
     @dp.message()
     async def handle_message(message: Message):
