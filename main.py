@@ -2,14 +2,14 @@ import asyncio
 import re
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
-from aiogram.filters import Command  # For handling commands
+from aiogram.filters import Command
 from oyat import getOyat
 from quran import getSurah
 from db_saver import save_user
 from agent_007 import send_to_admin
 import os
-
 from dotenv import load_dotenv
+from aiohttp import web  # Required for handling a dummy server
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -20,7 +20,6 @@ API_TOKEN = os.getenv("bot_token")
 # Validate the token
 if API_TOKEN is None:
     raise ValueError("bot_token is not set in the .env file.")
-API_TOKEN = os.getenv("bot_token")
 
 def split_into_chunks(input_string, max_length):
     parts = []
@@ -41,9 +40,6 @@ def split_into_chunks(input_string, max_length):
         parts.append(input_string)
 
     return parts
-
-
-
 
 async def main():
     # Initialize the bot and dispatcher
@@ -72,8 +68,8 @@ async def main():
         message_text = message.text
         message_id = message.message_id
         try:
-           save_user(user_id, is_bot, first_name, username, user_type, message_text, message_id)
-           send_to_admin(username, user_id, message_text)
+            save_user(user_id, is_bot, first_name, username, user_type, message_text, message_id)
+            send_to_admin(username, user_id, message_text)
         except:
             pass   
         if re.fullmatch(r"\d+", message.text):  # Matches a single number
@@ -88,7 +84,14 @@ async def main():
             await message.reply(response or "Could not fetch Ayah.")
         else:
             await message.reply("Invalid input format. Use a single number (e.g. 78) or a colon-separated format (e.g., 78:8).")
-   
+
+    # Start the polling and a dummy web server
+    runner = web.AppRunner(web.Application())  # Dummy server to bind a port
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", int(os.getenv("PORT", 8080)))
+    await site.start()
+    print("Dummy server running on port", os.getenv("PORT", 8080))
+
     # Start polling updates from Telegram
     await dp.start_polling(bot)
 
